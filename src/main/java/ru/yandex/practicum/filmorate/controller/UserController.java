@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,6 +38,17 @@ public class UserController {
         user.setId(getNextId());
         users.put(user.getId(), user);
         log.info("Пользователь создан: id={}, login={}", user.getId(), user.getLogin());
+        return user;
+    }
+
+    @GetMapping("/{id}")
+    public User findById(@PathVariable Long id) {
+        log.info("Запрос на получение пользователя по id={}", id);
+        User user = users.get(id);
+        if (user == null) {
+            log.warn("Пользователь с id={} не найден", id);
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
+        }
         return user;
     }
 
