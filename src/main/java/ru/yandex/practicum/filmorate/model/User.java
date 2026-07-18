@@ -5,6 +5,9 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import java.time.LocalDate;
 
+/**
+ * User.
+ */
 @Data
 public class User {
     private Long id;
