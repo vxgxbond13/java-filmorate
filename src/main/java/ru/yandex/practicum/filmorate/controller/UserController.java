@@ -29,22 +29,17 @@ public class UserController {
     @PostMapping
     public User create(@RequestBody User user) {
         log.info("Создание пользователя: email={}, login={}", user.getEmail(), user.getLogin());
-        try {
             user.validate();
             user.setId(getNextId());
             users.put(user.getId(), user);
             log.info("Пользователь создан: id={}, login={}", user.getId(), user.getLogin());
             return user;
-        } catch (Exception e) {
-            log.error("Ошибка при создании пользователя: {}", e.getMessage());
-            throw e;
-        }
     }
 
     @PutMapping
     public User update(@RequestBody User user) {
         log.info("Обновление пользователя: id={}, login={}", user.getId(), user.getLogin());
-        try {
+
             user.validate();
 
             if (user.getId() == null) {
@@ -61,10 +56,6 @@ public class UserController {
             log.info("Пользователь обновлён: id={}, login={}", user.getId(), user.getLogin());
             return user;
 
-        } catch (Exception e) {
-            log.error("Ошибка при обновлении пользователя: {}", e.getMessage());
-            throw e;
-        }
     }
 
     private long getNextId() {

@@ -30,22 +30,19 @@ public class FilmController {
     @PostMapping
     public Film create(@RequestBody Film film) {
         log.info("Создание фильма: name={}", film.getName());
-        try {
+
             film.validate();
             film.setId(getNextId());
             films.put(film.getId(), film);
             log.info("Фильм создан: id={}, name={}", film.getId(), film.getName());
             return film;
-        } catch (Exception e) {
-            log.error("Ошибка при создании фильма: {}", e.getMessage());
-            throw e;
-        }
+
     }
 
     @PutMapping
     public Film update(@RequestBody Film film) {
         log.info("Обновление фильма: id={}, name={}", film.getId(), film.getName());
-        try {
+
             film.validate();
 
             if (film.getId() == null) {
@@ -61,11 +58,6 @@ public class FilmController {
             films.put(film.getId(), film);
             log.info("Фильм обновлён: id={}, name={}", film.getId(), film.getName());
             return film;
-
-        } catch (Exception e) {
-            log.error("Ошибка при обновлении фильма: {}", e.getMessage());
-            throw e;
-        }
     }
 
     private long getNextId() {
