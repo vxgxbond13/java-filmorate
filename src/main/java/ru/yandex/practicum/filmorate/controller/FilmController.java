@@ -10,20 +10,22 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
 
-    private final List<Film> films = new ArrayList<>();
-    private Long nextId = 1L;
+    private final Map<Long, Film> films = new HashMap<>();
 
     @GetMapping
-    public List<Film> findAll() {
+    public Collection<Film> findAll() {
         log.info("Запрос на получение всех фильмов. Количество: {}", films.size());
-        return films;
+        return films.values();
     }
 
     @PostMapping
@@ -31,8 +33,8 @@ public class FilmController {
         log.info("Создание фильма: name={}", film.getName());
         try {
             film.validate();
-            film.setId(nextId++);
-            films.add(film);
+            film.setId(getNextId());
+            films.put(film.getId(), film);
             log.info("Фильм создан: id={}, name={}", film.getId(), film.getName());
             return film;
         } catch (Exception e) {
@@ -46,18 +48,34 @@ public class FilmController {
         log.info("Обновление фильма: id={}, name={}", film.getId(), film.getName());
         try {
             film.validate();
-            for (int i = 0; i < films.size(); i++) {
-                if (films.get(i).getId().equals(film.getId())) {
-                    films.set(i, film);
-                    return film;
-                }
+
+            if (film.getId() == null) {
+                log.warn("Id фильма не указан");
+                throw new RuntimeException("Id фильма должен быть указан");
             }
-            log.warn("Фильм с id={} не найден", film.getId());
-            throw new RuntimeException("Фильм с id " + film.getId() + " не найден");
+
+            if (!films.containsKey(film.getId())) {
+                log.warn("Фильм с id={} не найден", film.getId());
+                throw new RuntimeException("Фильм с id " + film.getId() + " не найден");
+            }
+
+            films.put(film.getId(), film);
+            log.info("Фильм обновлён: id={}, name={}", film.getId(), film.getName());
+            return film;
+
         } catch (Exception e) {
             log.error("Ошибка при обновлении фильма: {}", e.getMessage());
             throw e;
         }
+    }
+
+    private long getNextId() {
+        long currentMaxId = films.keySet()
+                .stream()
+                .mapToLong(id -> id)
+                .max()
+                .orElse(0);
+        return ++currentMaxId;
     }
 
 }
