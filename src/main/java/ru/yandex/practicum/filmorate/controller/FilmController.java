@@ -1,99 +1,124 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ErrorResponse;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
 
-    private final Map<Long, Film> films = new HashMap<>();
+    private final FilmService filmService;
+
+    // ========== ОСНОВНЫЕ ЭНДПОИНТЫ ==========
 
     @GetMapping
     public Collection<Film> findAll() {
-        log.info("Запрос на получение всех фильмов. Количество: {}", films.size());
-        return films.values();
+        log.info("GET /films - запрос всех фильмов");
+        return filmService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Film findById(@PathVariable Long id) {
+        log.info("GET /films/{} - запрос фильма", id);
+        return filmService.findById(id);
     }
 
     @PostMapping
     public Film create(@RequestBody Film film) {
-        log.info("Создание фильма: name={}", film.getName());
-
-        validate(film);
-        film.setId(getNextId());
-        films.put(film.getId(), film);
-        log.info("Фильм создан: id={}, name={}", film.getId(), film.getName());
-        return film;
-
+        log.info("POST /films - создание фильма: {}", film.getName());
+        return filmService.create(film);
     }
 
     @PutMapping
     public Film update(@RequestBody Film film) {
-        log.info("Обновление фильма: id={}, name={}", film.getId(), film.getName());
-        try {
-            validate(film);
-
-            if (film.getId() == null) {
-                log.warn("Id фильма не указан");
-                throw new ValidationException("Id фильма должен быть указан");
-            }
-
-            if (!films.containsKey(film.getId())) {
-                log.warn("Фильм с id={} не найден", film.getId());
-                throw new NotFoundException("Фильм с id " + film.getId() + " не найден"); // ✅ 404
-            }
-
-            films.put(film.getId(), film);
-            log.info("Фильм обновлён: id={}, name={}", film.getId(), film.getName());
-            return film;
-
-        } catch (Exception e) {
-            log.error("Ошибка при обновлении фильма: {}", e.getMessage());
-            throw e;
-        }
+        log.info("PUT /films - обновление фильма id={}", film.getId());
+        return filmService.update(film);
     }
 
-    private long getNextId() {
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+
+    // ========== ЛАЙКИ ==========
+
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("PUT /films/{}/like/{} - добавление лайка", id, userId);
+        filmService.addLike(id, userId);
     }
 
-    private void validate(Film film) {
-        if (film.getName() == null || film.getName().isBlank()) {
-            throw new ValidationException("Название не может быть пустым");
-        }
-
-        if (film.getDescription() != null && film.getDescription().length() > 200) {
-            throw new ValidationException("Описание не может быть длиннее 200 символов");
-        }
-
-        LocalDate minDate = LocalDate.of(1895, 12, 28);
-        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(minDate)) {
-            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
-        }
-
-        if (film.getDuration() == null || film.getDuration() <= 0) {
-            throw new ValidationException("Продолжительность должна быть положительным числом");
-        }
+    @DeleteMapping("/{id}/like/{userId}")
+    public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("DELETE /films/{}/like/{} - удаление лайка", id, userId);
+        filmService.removeLike(id, userId);
     }
+
+    @GetMapping("/popular")
+    public List<Film> getPopular(@RequestParam(defaultValue = "10") int count) {
+        log.info("GET /films/popular?count={} - запрос популярных фильмов", count);
+        return filmService.getTopPopularFilms(count);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        log.info("DELETE /films/{} - удаление фильма", id);
+        filmService.delete(id);
+    }
+
+    /**
+     * 400 BAD REQUEST — ошибка валидации
+     */
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidation(ValidationException e) {
+        log.warn("FilmController: Validation error: {}", e.getMessage());
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Ошибка валидации",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+    }
+
+    /**
+     * 404 NOT FOUND — объект не найден
+     */
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFound(NotFoundException e) {
+        log.warn("FilmController: Not found: {}", e.getMessage());
+        return new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Объект не найден",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+    }
+
+    /**
+     * 500 INTERNAL SERVER ERROR — все остальные ошибки
+     */
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleGeneric(Exception e) {
+        log.error("FilmController: Unexpected error: {}", e.getMessage(), e);
+        return new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Внутренняя ошибка сервера",
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+    }
+
 
 }
