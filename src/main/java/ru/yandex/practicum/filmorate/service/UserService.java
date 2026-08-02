@@ -21,7 +21,6 @@ public class UserService {
 
     private final UserStorage userStorage;
 
-    // ========== CRUD ==========
 
     public Collection<User> findAll() {
         return userStorage.findAll();
@@ -61,7 +60,6 @@ public class UserService {
         userStorage.delete(id);
     }
 
-    // ========== ДРУЗЬЯ ==========
 
     public void addFriend(Long userId, Long friendId) {
         log.debug("UserService: добавление в друзья userId={}, friendId={}", userId, friendId);
@@ -90,16 +88,14 @@ public class UserService {
     public void removeFriend(Long userId, Long friendId) {
         log.debug("UserService: удаление из друзей userId={}, friendId={}", userId, friendId);
 
-        // Проверяем существование пользователей
         User user = findById(userId);
         User friend = findById(friendId);
 
         if (!user.getFriends().contains(friendId)) {
             log.debug("UserService: пользователи {} и {} не являются друзьями, удаление игнорируется", userId, friendId);
-            return;  // ← просто возвращаем 200
+            return;
         }
 
-        // Удаляем друг друга из друзей
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
 
@@ -137,7 +133,6 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    // ========== ВАЛИДАЦИЯ ==========
 
     private void validate(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {

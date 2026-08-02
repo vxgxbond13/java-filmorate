@@ -22,8 +22,6 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserService userService;
 
-    // ========== Базовые CRUD операции ==========
-
     public Collection<Film> findAll() {
         return filmStorage.findAll();
     }
@@ -62,7 +60,6 @@ public class FilmService {
         filmStorage.delete(id);
     }
 
-    // ========== Бизнес-логика: лайки ==========
 
     public void addLike(Long filmId, Long userId) {
         log.debug("FilmService: добавление лайка filmId={}, userId={}", filmId, userId);
@@ -81,9 +78,7 @@ public class FilmService {
         log.info("FilmService: пользователь {} лайкнул фильм {}", userId, filmId);
     }
 
-    /**
-     * Удалить лайк у фильма
-     */
+
     public void removeLike(Long filmId, Long userId) {
         log.debug("FilmService: удаление лайка filmId={}, userId={}", filmId, userId);
 
@@ -99,9 +94,6 @@ public class FilmService {
         log.info("FilmService: пользователь {} убрал лайк с фильма {}", userId, filmId);
     }
 
-    /**
-     * Получить топ-N самых популярных фильмов по количеству лайков
-     */
     public List<Film> getTopPopularFilms(int count) {
         log.debug("FilmService: получение топ-{} популярных фильмов", count);
 
@@ -110,8 +102,6 @@ public class FilmService {
                 .limit(count)
                 .collect(Collectors.toList());
     }
-
-    // ========== ВАЛИДАЦИЯ ==========
 
     private void validate(Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
