@@ -28,9 +28,12 @@
 
 ## 🗄️ Схема базы данных
 
-![Схема базы данных](diagram.png)
+![Схема базы данных]
 
-> *Диаграмма создана в [dbdiagram.io](https://dbdiagram.io/)*
+<img width="1047" height="692" alt="image" src="https://github.com/user-attachments/assets/c2e974de-1864-4792-bf17-4626ac35e55d" />
+
+
+> *Диаграмма создана в [[dbdiagram.io](https://dbdiagram.io/)*](https://dbdiagram.io/d/6a70ec4b829f06bdc8745b27)
 
 ---
 
@@ -111,10 +114,3 @@
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Дата лайка |
 
 ---
-
-
-FROM films f
-LEFT JOIN film_genres fg ON f.id = fg.film_id
-LEFT JOIN genres g ON fg.genre_id = g.id
-GROUP BY f.id
-ORDER BY f.id;
