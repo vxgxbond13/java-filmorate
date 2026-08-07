@@ -1,119 +1,296 @@
+\# 🎬 Filmorate
 
-# 🎬 Filmorate
 
-**Filmorate** — это приложение для управления фильмами, пользователями и их взаимодействиями (лайки, друзья). 
-Проект реализован на **Java + Spring Boot** с использованием **JDBC** и **SQL**.
 
----
+\*\*Filmorate\*\* — это приложение для управления фильмами, пользователями и их взаимодействиями (лайки, друзья). 
 
-## 📚 Содержание
+Проект реализован на \*\*Java + Spring Boot\*\* с использованием \*\*JDBC\*\* и \*\*SQL\*\*.
 
-- [Технологии](#технологии)
-- [Схема базы данных](#схема-базы-данных)
-- [Описание таблиц](#описание-таблиц)
 
----
 
-## 🛠️ Технологии
+\---
+
+
+
+\## 📚 Содержание
+
+
+
+\- \[Технологии](#технологии)
+
+\- \[Схема базы данных](#схема-базы-данных)
+
+\- \[Описание таблиц](#описание-таблиц)
+
+\- \[Примеры запросов](#примеры-запросов)
+
+\- \[Структура проекта](#структура-проекта)
+
+\- \[Как запустить](#как-запустить)
+
+
+
+\---
+
+
+
+\## 🛠️ Технологии
+
+
 
 | Технология | Версия | Описание |
+
 |------------|--------|----------|
-| **Java** | 11+ | Основной язык программирования |
-| **Spring Boot** | 2.7.x | Фреймворк для создания приложений |
-| **Spring JDBC** | - | Работа с базой данных |
-| **SQL** | - | Язык запросов |
-| **Lombok** | - | Генерация кода |
-| **JUnit** | 5 | Тестирование |
 
----
+| \*\*Java\*\* | 21 | Основной язык программирования |
 
-## 🗄️ Схема базы данных
+| \*\*Spring Boot\*\* | 3.5.x | Фреймворк для создания приложений |
 
-![Схема базы данных]
+| \*\*Spring JDBC\*\* | - | Работа с базой данных через JdbcTemplate |
 
-<img width="1047" height="692" alt="image" src="https://github.com/user-attachments/assets/c2e974de-1864-4792-bf17-4626ac35e55d" />
+| \*\*H2 Database\*\* | 2.2.x | Встроенная база данных для разработки |
+
+| \*\*SQL\*\* | - | Язык запросов |
+
+| \*\*Lombok\*\* | 1.18.x | Генерация кода (геттеры, сеттеры, конструкторы) |
+
+| \*\*JUnit\*\* | 5 | Тестирование |
 
 
-> *Диаграмма создана в [[dbdiagram.io](https://dbdiagram.io/)*](https://dbdiagram.io/d/6a70ec4b829f06bdc8745b27)
 
----
+\---
 
-## 📋 Описание таблиц
 
-### 1. `users` — Пользователи
+
+\## 🗄️ Схема базы данных
+
+
+
+!\[Схема базы данных]
+
+(images/diagram.png)
+
+
+
+
+
+> \*Диаграмма https://dbdiagram.io/d/6a70ec4b829f06bdc8745b27
+
+
+
+\---
+
+
+
+\## 📋 Описание таблиц
+
+
+
+\### 1. `users` — Пользователи
+
+
 
 | Колонка | Тип | Ограничения | Описание |
+
 |---------|-----|-------------|----------|
-| `id` | BIGINT | PK, AUTO_INCREMENT | Уникальный идентификатор |
+
+| `id` | BIGINT | PK, AUTO\_INCREMENT | Уникальный идентификатор |
+
 | `email` | VARCHAR(255) | NOT NULL, UNIQUE | Электронная почта |
+
 | `login` | VARCHAR(100) | NOT NULL, UNIQUE | Логин пользователя |
+
 | `name` | VARCHAR(255) | - | Имя пользователя |
+
 | `birthday` | DATE | NOT NULL | Дата рождения |
 
----
 
-### 2. `friendship_statuses` — Статусы дружбы
+
+\---
+
+
+
+\### 2. `friendship\_statuses` — Статусы дружбы
+
+
 
 | Колонка | Тип | Ограничения | Описание |
+
 |---------|-----|-------------|----------|
-| `id` | INTEGER | PK, AUTO_INCREMENT | Уникальный идентификатор |
+
+| `id` | INTEGER | PK, AUTO\_INCREMENT | Уникальный идентификатор |
+
 | `name` | VARCHAR(20) | NOT NULL, UNIQUE | Код статуса (PENDING, CONFIRMED) |
-| `display_name` | VARCHAR(50) | NOT NULL | Отображаемое имя |
+
+| `display\_name` | VARCHAR(50) | NOT NULL | Отображаемое имя |
+
 | `description` | VARCHAR(255) | - | Описание статуса |
 
----
 
-### 3. `friendships` — Дружба
 
-| Колонка | Тип | Ограничения | Описание |
-|---------|-----|-------------|----------|
-| `user_id` | BIGINT | PK, FK → users.id | ID пользователя |
-| `friend_id` | BIGINT | PK, FK → users.id | ID друга |
-| `status_id` | INTEGER | NOT NULL, FK → friendship_statuses.id | Статус дружбы |
-| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Дата создания |
-| `updated_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Дата обновления |
+\---
 
----
 
-### 4. `films` — Фильмы
+
+\### 3. `friendships` — Дружба
+
+
 
 | Колонка | Тип | Ограничения | Описание |
+
 |---------|-----|-------------|----------|
-| `id` | BIGINT | PK, AUTO_INCREMENT | Уникальный идентификатор |
+
+| `user\_id` | BIGINT | PK, FK → users.id | ID пользователя |
+
+| `friend\_id` | BIGINT | PK, FK → users.id | ID друга |
+
+| `status\_id` | INTEGER | NOT NULL, FK → friendship\_statuses.id | Статус дружбы |
+
+| `created\_at` | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP | Дата создания |
+
+| `updated\_at` | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP | Дата обновления |
+
+
+
+\---
+
+
+
+\### 4. `mpa\_ratings` — MPA Рейтинги
+
+
+
+| Колонка | Тип | Ограничения | Описание |
+
+|---------|-----|-------------|----------|
+
+| `id` | INTEGER | PK, AUTO\_INCREMENT | Уникальный идентификатор |
+
+| `name` | VARCHAR(10) | NOT NULL, UNIQUE | Название рейтинга (G, PG, PG-13, R, NC-17) |
+
+
+
+\---
+
+
+
+\### 5. `films` — Фильмы
+
+
+
+| Колонка | Тип | Ограничения | Описание |
+
+|---------|-----|-------------|----------|
+
+| `id` | BIGINT | PK, AUTO\_INCREMENT | Уникальный идентификатор |
+
 | `name` | VARCHAR(255) | NOT NULL | Название фильма |
+
 | `description` | TEXT | - | Описание |
-| `release_date` | DATE | NOT NULL | Дата релиза |
+
+| `release\_date` | DATE | NOT NULL | Дата релиза |
+
 | `duration` | INTEGER | NOT NULL | Продолжительность (минуты) |
-| `mpa_rating` | VARCHAR(10) | - | Рейтинг MPA (G, PG, PG-13, R, NC-17) |
 
----
+| `mpa\_rating\_id` | INTEGER | FK → mpa\_ratings.id | ID рейтинга MPA |
 
-### 5. `genres` — Жанры
+
+
+\---
+
+
+
+\### 6. `genres` — Жанры
+
+
 
 | Колонка | Тип | Ограничения | Описание |
+
 |---------|-----|-------------|----------|
-| `id` | INTEGER | PK, AUTO_INCREMENT | Уникальный идентификатор |
+
+| `id` | INTEGER | PK, AUTO\_INCREMENT | Уникальный идентификатор |
+
 | `name` | VARCHAR(100) | NOT NULL, UNIQUE | Название жанра |
 
----
 
-### 6. `film_genres` — Связь фильмов с жанрами (многие-ко-многим)
 
-| Колонка | Тип | Ограничения | Описание |
-|---------|-----|-------------|----------|
-| `film_id` | BIGINT | PK, FK → films.id | ID фильма |
-| `genre_id` | INTEGER | PK, FK → genres.id | ID жанра |
+\---
 
----
 
-### 7. `likes` — Лайки
+
+\### 7. `film\_genres` — Связь фильмов с жанрами (многие-ко-многим)
+
+
 
 | Колонка | Тип | Ограничения | Описание |
-|---------|-----|-------------|----------|
-| `film_id` | BIGINT | PK, FK → films.id | ID фильма |
-| `user_id` | BIGINT | PK, FK → users.id | ID пользователя |
-| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Дата лайка |
 
----
-=======
+|---------|-----|-------------|----------|
+
+| `film\_id` | BIGINT | PK, FK → films.id | ID фильма |
+
+| `genre\_id` | INTEGER | PK, FK → genres.id | ID жанра |
+
+
+
+\---
+
+
+
+\### 8. `likes` — Лайки
+
+
+
+| Колонка | Тип | Ограничения | Описание |
+
+|---------|-----|-------------|----------|
+
+| `film\_id` | BIGINT | PK, FK → films.id | ID фильма |
+
+| `user\_id` | BIGINT | PK, FK → users.id | ID пользователя |
+
+| `created\_at` | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP | Дата лайка |
+
+
+
+\---
+
+
+
+\## 🔍 Примеры запросов
+
+
+
+\### Получить все фильмы с жанрами и рейтингом
+
+
+
+```sql
+
+SELECT 
+
+&#x20;   f.id,
+
+&#x20;   f.name,
+
+&#x20;   f.description,
+
+&#x20;   f.release\_date,
+
+&#x20;   f.duration,
+
+&#x20;   mr.name AS mpa\_rating,
+
+&#x20;   GROUP\_CONCAT(g.name ORDER BY g.name SEPARATOR ', ') AS genres
+
+FROM films f
+
+LEFT JOIN mpa\_ratings mr ON f.mpa\_rating\_id = mr.id
+
+LEFT JOIN film\_genres fg ON f.id = fg.film\_id
+
+LEFT JOIN genres g ON fg.genre\_id = g.id
+
+GROUP BY f.id
+
+ORDER BY f.id;
 
