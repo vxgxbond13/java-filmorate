@@ -11,7 +11,8 @@ public class FriendshipStatus {
     private String displayName; // Неподтверждённая, Подтверждённая
     private String description;
 
-    public FriendshipStatus() {}
+    public FriendshipStatus() {
+    }
 
     public FriendshipStatus(Integer id, String name, String displayName, String description) {
         this.id = id;

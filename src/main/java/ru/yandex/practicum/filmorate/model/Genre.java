@@ -9,7 +9,8 @@ public class Genre {
     private Integer id;
     private String name;
 
-    public Genre() {}
+    public Genre() {
+    }
 
     public Genre(Integer id, String name) {
         this.id = id;

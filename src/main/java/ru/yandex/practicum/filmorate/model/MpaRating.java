@@ -10,7 +10,8 @@ public class MpaRating {
     private String name;
     private String description;
 
-    public MpaRating() {}
+    public MpaRating() {
+    }
 
     public MpaRating(Integer id, String name, String description) {
         this.id = id;
