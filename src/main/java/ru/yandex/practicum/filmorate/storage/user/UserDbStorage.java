@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -115,9 +116,12 @@ public class UserDbStorage implements UserStorage {
         if (user.getFriends() == null || user.getFriends().isEmpty()) {
             return;
         }
+
         String sql = "INSERT INTO friendships (user_id, friend_id, status_id) VALUES (?, ?, ?)";
+        List<Object[]> batchArgs = new ArrayList<>();
         for (Long friendId : user.getFriends()) {
-            jdbcTemplate.update(sql, user.getId(), friendId, 1);
+            batchArgs.add(new Object[]{user.getId(), friendId, 1});
         }
+        jdbcTemplate.batchUpdate(sql, batchArgs);
     }
 }
