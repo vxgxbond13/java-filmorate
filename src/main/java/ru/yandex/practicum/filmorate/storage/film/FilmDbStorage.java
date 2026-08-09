@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.MpaRating;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -170,19 +171,25 @@ public class FilmDbStorage implements FilmStorage {
         if (film.getGenres() == null || film.getGenres().isEmpty()) {
             return;
         }
+
         String sql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
+        List<Object[]> batchArgs = new ArrayList<>();
         for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(sql, film.getId(), genre.getId());
+            batchArgs.add(new Object[]{film.getId(), genre.getId()});
         }
+        jdbcTemplate.batchUpdate(sql, batchArgs); // <- Только один запрос к БД, после цикла //
     }
 
-    private void saveLikes(Film film) {  // ← НОВЫЙ МЕТОД
+    private void saveLikes(Film film) {
         if (film.getLikes() == null || film.getLikes().isEmpty()) {
             return;
         }
+
         String sql = "INSERT INTO likes (film_id, user_id) VALUES (?, ?)";
+        List<Object[]> batchArgs = new ArrayList<>();
         for (Long userId : film.getLikes()) {
-            jdbcTemplate.update(sql, film.getId(), userId);
+            batchArgs.add(new Object[]{film.getId(), userId});
         }
+        jdbcTemplate.batchUpdate(sql, batchArgs); // <- Только один запрос к БД, после цикла //
     }
 }
