@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -16,10 +16,13 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
     private final UserStorage userStorage;
+
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
 
     public Collection<User> findAll() {
@@ -72,16 +75,13 @@ public class UserService {
         User friend = findById(friendId);
 
         if (user.getFriends().contains(friendId)) {
-            throw new ValidationException("Пользователи уже являются друзьями");
+            throw new ValidationException("Пользователь уже в друзьях");
         }
 
         user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
-
         userStorage.update(user);
-        userStorage.update(friend);
 
-        log.info("UserService: пользователи {} и {} стали друзьями", userId, friendId);
+        log.info("UserService: пользователь {} добавил {} в друзья", userId, friendId);
     }
 
 
@@ -92,17 +92,13 @@ public class UserService {
         User friend = findById(friendId);
 
         if (!user.getFriends().contains(friendId)) {
-            log.debug("UserService: пользователи {} и {} не являются друзьями, удаление игнорируется", userId, friendId);
             return;
         }
 
         user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
-
         userStorage.update(user);
-        userStorage.update(friend);
 
-        log.info("UserService: пользователи {} и {} больше не друзья", userId, friendId);
+        log.info("UserService: пользователь {} удалил {} из друзей", userId, friendId);
     }
 
     public Collection<User> getFriends(Long userId) {
